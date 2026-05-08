@@ -1,5 +1,7 @@
 # Exercise 2: Microservice Architecture, Docker & GitHub Actions
 
+[![CI](https://github.com/benjamingolic/CI-CD-MCM-Golic/actions/workflows/ci.yml/badge.svg)](https://github.com/benjamingolic/CI-CD-MCM-Golic/actions/workflows/ci.yml)
+
 **Course:** Continuous Delivery in Agile Software Development (Master)
 **Points:** 24
 
