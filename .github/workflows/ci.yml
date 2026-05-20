@@ -29,6 +29,17 @@ jobs:
       - name: Run tests with coverage
         run: go test -v -coverprofile=coverage.out ./...
 
+      - name: Check coverage threshold # (≥ 80%)
+        run: |
+          head -1 coverage.out > coverage_filtered.out
+          tail -n +2 coverage.out | grep -v "postgres" >> coverage_filtered.out
+          TOTAL=$(go tool cover -func=coverage_filtered.out | grep total | awk '{print $NF}' | tr -d '%')
+          echo "Coverage (excluding DB files): ${TOTAL}%"
+          if [ "$(echo "$TOTAL < 80" | bc)" -eq 1 ]; then
+            echo "::error::Coverage ${TOTAL}% is below the 80% threshold"
+            exit 1
+          fi
+
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
