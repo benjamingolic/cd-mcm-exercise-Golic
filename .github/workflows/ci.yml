@@ -88,6 +88,6 @@ jobs:
           name: coverage-ubuntu-latest-go1.26
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+        uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
