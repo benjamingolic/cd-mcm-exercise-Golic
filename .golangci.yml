@@ -13,20 +13,19 @@ linters:
     - staticcheck
     - unused
     - ineffassign
-    - gosimple
+    # removed gosimple because it is deprecated => in v2 it was merged into staticcheck
     - gocyclo
     - misspell
     - gocritic
-  settings: # <- Hierhin verschoben!
+  settings:
     errcheck:
       check-type-assertions: true
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - errcheck
 
 formatters:
   enable:
     - gofmt
-
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - errcheck
