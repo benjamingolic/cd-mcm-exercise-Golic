@@ -1,136 +1,102 @@
-# Exercise 3: CI Pipeline -- SonarCloud, Matrix Builds & Linting
+# Continuous Delivery in Agile Software Development -- Exercises
 
-**Course:** Continuous Delivery in Agile Software Development (Master)
-**Points:** 24
+[![CI](https://github.com/benjamingolic/CI-CD-MCM-Golic/actions/workflows/ci.yml/badge.svg)](https://github.com/benjamingolic/CI-CD-MCM-Golic/actions/workflows/ci.yml)
 
-## Learning Objectives
+This repository contains four progressive exercises for the Master course **Continuous Delivery in Agile Software Development**.
 
-- Extend a CI pipeline with quality gates and code analysis
-- Configure SonarCloud for static code analysis and coverage tracking
-- Use matrix builds to test across multiple Go versions
-- Integrate linting with golangci-lint
-- Understand code quality metrics and technical debt
+## Overview
+
+| Exercise | Topic | Branch |
+|----------|-------|--------|
+| 1 | Git Basics: PRs, Interactive Rebase, Unit Tests | `exercise/01-git-basics` |
+| 2 | Microservice Architecture, Docker & GitHub Actions | `exercise/02-microservice-docker` |
+| 3 | CI Pipeline: SonarCloud, Matrix Builds, Linting | `exercise/03-ci-pipeline` |
+| 4 | Vulnerability Scanning & Kubernetes Deployment | `exercise/04-security-k8s` |
+
+## Technology Stack
+
+- **Language:** Go 1.24+
+- **Web Framework:** Gorilla Mux
+- **Database:** PostgreSQL
+- **Containerization:** Docker & Docker Compose
+- **CI/CD:** GitHub Actions
+- **Code Quality:** SonarCloud, golangci-lint
+- **Security:** Trivy, govulncheck
+- **Deployment:** Kubernetes (Minikube)
+
+## Project: Product Catalog API
+
+Throughout the four exercises you will build and evolve a **Product Catalog API** -- a RESTful web service for managing products (create, read, update, delete). The API is written in Go and grows in complexity with each exercise.
+
+### What the Application Does
+
+The Product Catalog API exposes the following HTTP endpoints:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check |
+| GET | `/products` | List all products |
+| POST | `/products` | Create a new product |
+| GET | `/products/{id}` | Get a product by ID |
+| PUT | `/products/{id}` | Update a product |
+| DELETE | `/products/{id}` | Delete a product |
+
+A product has three fields: `id`, `name`, and `price`.
+
+### Project Structure
+
+```
+cmd/api/main.go                # Application entry point -- starts the HTTP server
+internal/
+  model/product.go             # Product data model and validation
+  store/
+    memory.go                  # In-memory store (Exercise 1-2)
+    postgres.go                # PostgreSQL store (from Exercise 2)
+  handler/handler.go           # HTTP request handlers (routing, JSON encoding)
+Dockerfile                     # Multi-stage Docker build (from Exercise 2)
+docker-compose.yml             # Orchestrates API + PostgreSQL (from Exercise 2)
+.github/workflows/ci.yml       # CI/CD pipeline (from Exercise 2, extended in 3-4)
+k8s/                           # Kubernetes manifests (Exercise 4)
+```
+
+### What You Build in Each Exercise
+
+| Exercise | What You Do |
+|----------|-------------|
+| **1 -- Git Basics** | Fork the repo, write unit tests for the in-memory store, create your first Pull Request, and practice interactive rebase to clean up commit history. |
+| **2 -- Microservice & Docker** | Understand the microservice architecture, complete a GitHub Actions CI pipeline with a Docker build job, analyze the Dockerfile and Docker Compose setup, and add HTTP handler tests. |
+| **3 -- CI Pipeline** | Extend the pipeline with matrix builds (multiple Go versions and OS), integrate golangci-lint for code quality, set up SonarCloud for static analysis, and improve test coverage to ≥ 80%. |
+| **4 -- Security & K8s** | Scan the Docker image with Trivy, scan Go dependencies with govulncheck, deploy the application to a local Kubernetes cluster (Minikube), and configure production-readiness features (probes, resource limits). |
+
+By the end of the course, you will have a fully containerized Go microservice with a complete CI/CD pipeline including automated testing, linting, security scanning, and Kubernetes deployment.
 
 ## Prerequisites
 
-- Completed Exercise 2 (working CI pipeline with Docker build)
-- SonarCloud account (free for open-source projects)
-- Understanding of GitHub Actions workflow syntax
+- Go 1.24+ installed
+- Git 2.30+
+- GitHub Account
+- Docker Desktop (from Exercise 2)
+- Minikube (Exercise 4)
 
-## What's New in This Exercise
+## Getting Started
 
-- **Matrix builds** in `.github/workflows/ci.yml` -- test across multiple Go versions
-- **SonarCloud configuration** (`sonar-project.properties`) -- static analysis setup
-- **golangci-lint configuration** (`.golangci.yml`) -- linter rules
-- **Coverage reporting** -- `go test -coverprofile`
+1. **Fork** this repository on GitHub (click the "Fork" button in the top right corner). **Uncheck** "Copy the `main` branch only" so that all exercise branches are included in your fork.
+2. **Clone** your fork:
 
----
+```bash
+git clone https://github.com/<your-username>/CI-CD-MCM.git
+cd CI-CD-MCM
+```
 
-## Tasks
+3. Switch to the respective exercise branch:
 
-### Task 1: Matrix Builds (4 Points)
+```bash
+git checkout exercise/01-git-basics
+```
 
-The CI workflow already has a matrix strategy with one Go version. Your tasks:
+> **Important:** Do not clone the original repository directly — always work on your own fork so you can push changes and create Pull Requests.
 
-1. **Extend the matrix** to include Go versions `1.25` and `1.26` (see the TODO in `ci.yml`).
-2. **Verify** that the pipeline runs tests for both Go versions in parallel.
-3. **Add an OS matrix dimension** (`ubuntu-latest`, `macos-latest`) so tests run on both platforms.
-
-**Expected result:** 4 parallel test jobs (2 Go versions x 2 OS).
-
-**Deliverable:** Screenshot of the GitHub Actions matrix view showing all jobs.
-
----
-
-### Task 2: Linting with golangci-lint (6 Points)
-
-1. **Add a `lint` job** to the CI workflow that:
-   - Runs `golangci-lint` using the `golangci/golangci-lint-action@v4` action
-   - Uses the `.golangci.yml` configuration file
-   - Runs in parallel with the test matrix (does not depend on `test`)
-
-2. **Enable additional linters** in `.golangci.yml` (see TODOs):
-   - `gofmt` -- enforces standard Go formatting
-   - `gocyclo` -- detects overly complex functions
-   - `misspell` -- catches common typos
-   - `gocritic` -- advanced Go code analysis
-
-3. **Fix any linting issues** that are reported in the existing code.
-
-**Deliverable:** Clean lint run (no warnings). Screenshot of the lint job passing.
-
----
-
-### Task 3: SonarCloud Integration (8 Points)
-
-1. **Create a SonarCloud project:**
-   - Go to [sonarcloud.io](https://sonarcloud.io) and sign in with GitHub.
-   - Import your repository as a new project.
-   - Note your `projectKey` and `organization`.
-
-2. **Configure `sonar-project.properties`:**
-   - Replace `YOUR_PROJECT_KEY` and `YOUR_ORGANIZATION` with your actual values.
-   - Ensure coverage reporting is configured correctly.
-
-3. **Add a `sonarcloud` job** to the CI workflow that:
-   - Runs after the `test` job (`needs: test`)
-   - Checks out the code with full history (`fetch-depth: 0`)
-   - Downloads the coverage artifact from the test job
-   - Runs the SonarCloud scan using `SonarSource/sonarqube-scan-action@v5`
-   - Passes the `SONAR_TOKEN` as an environment variable
-
-   > **Hint:** Look at the `sonar-project.properties` file to understand what SonarCloud expects.
-
-4. **Add the `SONAR_TOKEN` secret** to your repository settings.
-
-5. **Review the SonarCloud dashboard:**
-   - What is the code coverage percentage?
-   - Are there any code smells or bugs detected?
-   - What is the technical debt estimate?
-
-**Deliverable:** Link to your SonarCloud project dashboard. Screenshot showing the quality gate result.
-
----
-
-### Task 4: Code Coverage Improvement (6 Points)
-
-1. **Check current coverage:**
-   ```bash
-   go test -coverprofile=coverage.out ./...
-   go tool cover -func=coverage.out
-   go tool cover -html=coverage.out -o coverage.html
-   ```
-
-2. **Improve coverage to at least 80%** by adding tests for uncovered code paths. Focus on:
-   - Edge cases in handlers (invalid IDs, malformed JSON)
-   - Error paths in the store layer
-   - The `Validate()` method edge cases
-
-3. **Add a coverage threshold check** to the CI pipeline as a step after running tests:
-   - Extract the total coverage percentage from `go tool cover -func`
-   - Fail the build if coverage is below 80%
-   - Use `::error::` to display the error in the GitHub Actions UI
-
-   > **Hint:** `go tool cover -func=coverage.out | grep total` gives you the total line. Use `awk` and `sed` to extract the number. Use `bc` for the comparison (works on both Linux and macOS).
-
-4. **Upload a coverage HTML report** as a build artifact:
-   - Generate an HTML report using `go tool cover -html`
-   - Upload it using `actions/upload-artifact@v4` so it can be downloaded from the Actions run
-
-**Deliverable:** Coverage report showing >= 80%. Updated tests. Coverage HTML artifact downloadable from the Actions run.
-
----
-
-## Grading
-
-| Task | Points |
-|------|--------|
-| Matrix Builds | 4 |
-| Linting with golangci-lint | 6 |
-| SonarCloud Integration | 8 |
-| Code Coverage Improvement | 6 |
-| **Total** | **24** |
+Each exercise branch contains a detailed `README.md` with instructions.
 
 ## Author
 - FH-Prof. Dr. Marc Kurz (marc.kurz@fh-hagenberg.at)
-
