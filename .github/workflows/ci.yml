@@ -33,6 +33,7 @@ jobs:
         run: |
           head -1 coverage.out > coverage_filtered.out
           tail -n +2 coverage.out | grep -vE "postgres|cmd" >> coverage_filtered.out
+          go tool cover -html=coverage_filtered.out -o coverage.html
           TOTAL=$(go tool cover -func=coverage_filtered.out | grep total | awk '{print $NF}' | tr -d '%')
           echo "Coverage (excluding DB files): ${TOTAL}%"
           if [ "$(echo "$TOTAL < 80" | bc)" -eq 1 ]; then
@@ -44,7 +45,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.os }}-go${{ matrix.go-version }}
-          path: coverage.out
+          path: |
+            coverage.out
+            coverage_filtered.out
+            coverage.html
 
       - name: Build
         run: go build -o api-server ./cmd/api
