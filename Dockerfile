@@ -9,14 +9,12 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o /api-server ./cmd/api
 
-# Runtime stage
-FROM alpine:3.19
+# Runtime stage – scratch eliminates all OS-level vulnerabilities
+FROM scratch
 
-RUN apk --no-cache add ca-certificates
-
-WORKDIR /app
-COPY --from=builder /api-server .
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /api-server /api-server
 
 EXPOSE 8080
 
-ENTRYPOINT ["./api-server"]
+ENTRYPOINT ["/api-server"]
