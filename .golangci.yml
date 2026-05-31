@@ -1,6 +1,8 @@
 # golangci-lint configuration
 # Reference: https://golangci-lint.run/usage/configuration/
 
+version: "2"
+
 run:
   timeout: 5m
 
@@ -11,19 +13,19 @@ linters:
     - staticcheck
     - unused
     - ineffassign
-    - gosimple
-    # TODO: Enable additional linters:
-    # - gofmt
-    # - gocyclo
-    # - misspell
-    # - gocritic
+    # removed gosimple because it is deprecated => in v2 it was merged into staticcheck
+    - gocyclo
+    - misspell
+    - gocritic
+  settings:
+    errcheck:
+      check-type-assertions: true
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - errcheck
 
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - errcheck
+formatters:
+  enable:
+    - gofmt

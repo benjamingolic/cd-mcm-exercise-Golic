@@ -22,3 +22,24 @@ func TestValidateValidProduct(t *testing.T) {
 		t.Error("expected validation to pass for valid product")
 	}
 }
+
+func TestValidateZeroPrice(t *testing.T) {
+	p := Product{Name: "Free Item", Price: 0}
+	if !p.Validate() {
+		t.Error("expected validation to pass for zero price")
+	}
+}
+
+func TestValidateEmptyNameAndNegativePrice(t *testing.T) {
+	p := Product{Name: "", Price: -1.0}
+	if p.Validate() {
+		t.Error("expected validation to fail for empty name and negative price")
+	}
+}
+
+func TestValidateWithID(t *testing.T) {
+	p := Product{ID: 42, Name: "Widget", Price: 5.0}
+	if !p.Validate() {
+		t.Error("expected validation to pass regardless of ID")
+	}
+}
